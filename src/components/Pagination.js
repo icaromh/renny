@@ -16,6 +16,7 @@ export default function Pagination({
       <div className="pagination-buttons">
         {pages.map((_, idx) => (
           <button
+            key={idx}
             onClick={() => onClickPage(idx)}
             className={`pagination-button ${idx === current ? 'active' : ''}`}
             disabled={idx === current}>

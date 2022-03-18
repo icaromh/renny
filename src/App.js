@@ -14,18 +14,29 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState()
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(0)
   const [state, setState] = useState()
+
+  const resetState = () => {
+    setProducts([])
+    setSelectedProduct(null)
+    setTotal(0)
+    setSearch("")
+    setPage(1)
+    setState(null)
+  }
 
   const handleClickLoadMore = (evt) => {
     evt.preventDefault();
     setState('LOADING')
 
-    setPage(page => page + 1)
-    fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}&start=${page * perPage}`)
+    if (search.trim() === "") return
+
+    fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}&start=${(page + 1) * perPage}`)
       .then(res => res.json())
       .then(({ data, total }) => {
         setTotal(total)
+        setPage(page => page + 1)
         setProducts(products => [...products, ...data])
       }).finally(() => setState('DONE'))
   }
@@ -33,6 +44,13 @@ function App() {
   const handleClickPage = (curPage) => {
     setState('LOADING')
     setPage(curPage)
+
+    document.querySelector('.grid').scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    })
+
     fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}&start=${curPage * perPage}`)
       .then(res => res.json())
       .then(({ data, total }) => {
@@ -43,16 +61,17 @@ function App() {
 
   const handleSubmit = (evt) => {
     setState('LOADING')
-    setPage(1);
+    setPage(0);
     setProducts([])
     setTotal(0)
     evt.preventDefault();
+
+    if (search.trim() === "") return
 
     fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}`)
       .then(res => res.json())
       .then(({ data, total }) => {
         setTotal(total)
-        console.log(data)
         setProducts(data)
       }).finally(() => setState('DONE'))
   }
@@ -61,12 +80,17 @@ function App() {
     const skuId = product.sku_list[0]
     const productId = product.id
 
+    setSelectedProduct({
+      product
+    });
+
     fetch(`https://renner.icaro-mh.workers.dev/product?skuIds=${skuId}&productId=${productId}`)
       .then(res => res.json())
       .then(data => {
+        const details = data[Object.keys(data)[0]]
         setSelectedProduct({
           product,
-          details: data
+          details,
         });
       })
   }
@@ -80,11 +104,17 @@ function App() {
       <div className='header'>
 
         <div>
-          <h1>Renny</h1>
+          <h1 onClick={() => resetState()}>Renny</h1>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <input placeholder='Produto a ser buscado' onKeyUp={(evt) => setSearch(evt.target.value)} />
+          <input
+            placeholder='Produto a ser buscado'
+            type="search"
+            autoFocus
+            defaultValue={search}
+            onChange={(evt) => setSearch(evt.target.value)}
+          />
         </form>
 
         <div className='results'>
@@ -109,7 +139,7 @@ function App() {
         ))}
       </div>
 
-      {products.length && (
+      {products.length && search && (
         <>
           <Pagination onClickPage={handleClickPage} total={total} perPage={perPage} current={page}>
             <div className='load-more-area'>
