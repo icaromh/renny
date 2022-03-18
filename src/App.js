@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import Pagination from './components/Pagination'
 import ProductDetails from './components/ProductDetails'
+import Sizes from './components/Sizes'
 
 function sanitizeLetters(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -128,13 +129,8 @@ function App() {
         {products.filter(p => p.gender && p.gender[0] === 'Feminino').map(p => (
           <div className='product' key={p.linkId} onClick={() => handleProductDetails(p)}>
             <img target='_blank' src={p.imageId} />
-
-            <div className='sizes'>
-              {p.size?.map(size => <span className="size-value">{size}</span>)}
-            </div>
-
+            {p?.size && <Sizes sizes={p.size} categoryName={p.categoryName} />}
             <span className='product-name'>{p.name}</span>
-
           </div>
         ))}
       </div>

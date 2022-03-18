@@ -1,6 +1,6 @@
 export default function ProductDetails({ data, handleClose }) {
   const { product, details } = data
-
+  
   return (
     <div className="product-details">
       <div className="product-details-header">
