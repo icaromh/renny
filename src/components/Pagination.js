@@ -11,8 +11,6 @@ export default function Pagination({
 
   return (
     <div className='pagination'>
-      <div className="go-to-page">Navegar para página: </div>
-
       <div className="pagination-buttons">
         {pages.map((_, idx) => (
           <button
@@ -23,9 +21,7 @@ export default function Pagination({
             {idx + 1}
           </button>
         ))}
-
       </div>
-
       {children}
     </div>
   )

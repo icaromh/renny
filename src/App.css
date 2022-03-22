@@ -128,10 +128,11 @@ body {
 }
 
 .pagination {
-  box-shadow: 0px -1px 4px 1px #333;
+  box-shadow: 0px 1px 4px 1px #333;
   min-height: 40px;
-  padding: 5px;
+  padding: 10px;
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
   justify-content: center;
   justify-items: center;
@@ -142,7 +143,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
-  max-width: 80%;
+  max-width: 90%;
 }
 
 .pagination-button {
@@ -157,8 +158,12 @@ body {
   margin-right: 5px;
 }
 
-.load-more-area {
-  margin-left: 2rem;
+.load-more-button {
+  margin-top: 5px;
+  border-radius: 5px;
+  background-color: #f1f1f1;
+  border: 1px solid #333;
+  padding: 5px;
 }
 
 .product-details {

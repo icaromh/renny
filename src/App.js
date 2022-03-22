@@ -133,22 +133,20 @@ function App() {
             <span className='product-name'>{p.name}</span>
           </div>
         ))}
+
+
       </div>
 
       {products.length && search && (
-        <>
-          <Pagination onClickPage={handleClickPage} total={total} perPage={perPage} current={page}>
-            <div className='load-more-area'>
-              <button onClick={handleClickLoadMore} disabled={state === 'LOADING' || page >= Math.ceil(total / perPage)}>
-                {
-                  state === 'LOADING' ?
-                    <span>Carregando ... ⌛️</span>
-                    : <span>Carregar mais produtos</span>
-                }
-              </button>
-            </div>
-          </Pagination>
-        </>
+        <Pagination onClickPage={handleClickPage} total={total} perPage={perPage} current={page}>
+          <button className='load-more-button' onClick={handleClickLoadMore} disabled={state === 'LOADING' || page >= Math.ceil(total / perPage)}>
+            {
+              state === 'LOADING' ?
+                <span>Carregando ... ⌛️</span>
+                : <span>Carregar mais produtos</span>
+            }
+          </button>
+        </Pagination>
       )}
 
       {selectedProduct && (
