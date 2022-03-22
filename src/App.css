@@ -176,15 +176,14 @@ body {
   z-index: 5;
 }
 
-.product-details::before {
-  content: "";
+.modal-backdrop {
   background-color: rgba(0, 0, 0, 0.4);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: -1;
+  z-index: 1;
 }
 
 .product-details-header {
@@ -227,7 +226,7 @@ body {
   grid-auto-flow: column;
   grid-template-rows: minmax(0, 1fr);
   height: 100%;
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; */
   background-color: #fefefe;
 }
 
