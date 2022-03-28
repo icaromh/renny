@@ -1,4 +1,4 @@
-import { SEARCH_URL } from '../constants'
+import { RESULTS_PER_PAGE, SEARCH_URL } from '../constants'
 
 type Product = {
   name: string
@@ -28,8 +28,8 @@ function SearchRoute(request: Request): Promise<any> {
   const { searchParams } = new URL(request.url)
 
   const term = searchParams.get('query')
-  const start = searchParams.get('start') || 0
-  const searchUrl = `${SEARCH_URL}&query=${term}&start=${start}`
+  const page: number = parseInt(searchParams.get('page') || '0', 10)
+  const searchUrl = `${SEARCH_URL}&query=${term}&start=${page * RESULTS_PER_PAGE}`
 
   return fetch(searchUrl)
     .then((response) => response.json())
