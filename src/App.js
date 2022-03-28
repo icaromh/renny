@@ -1,50 +1,43 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useReducer } from 'react';
 
 import Pagination from './components/Pagination'
 import ProductDetails from './components/ProductDetails'
 import Sizes from './components/Sizes'
 
-function sanitizeLetters(str) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-}
+import searchProduct from './services/search';
+import reducer from './reducer';
+import { REQUEST_STATUS, INITIAL_STATE } from './constants';
+import SearchBox from './components/SearchBox';
 
 function App() {
   const perPage = 80
-  const [products, setProducts] = useState([])
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+  const { fetchStatus, products, search, ...rstate } = state
+  
+  console.log('>>>> STATE ', state)
+
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [total, setTotal] = useState(0)
-  const [search, setSearch] = useState()
   const [page, setPage] = useState(0)
-  const [state, setState] = useState()
 
   const resetState = () => {
-    setProducts([])
-    setSelectedProduct(null)
-    setTotal(0)
-    setSearch("")
-    setPage(1)
-    setState(null)
+    dispatch({ type: 'RESET' })
   }
 
-  const handleClickLoadMore = (evt) => {
-    evt.preventDefault();
-    setState('LOADING')
-
+  const loadMoreProducts = () => {
     if (search.trim() === "") return
+    dispatch({ type: 'SET_FETCH_STATUS', value: REQUEST_STATUS.LOADING })
 
-    fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}&start=${(page + 1) * perPage}`)
-      .then(res => res.json())
-      .then(({ data, total }) => {
-        setTotal(total)
-        setPage(page => page + 1)
-        setProducts(products => [...products, ...data])
-      }).finally(() => setState('DONE'))
+    searchProduct(search, page)
+      .then(value => dispatch({ type: 'LOAD_MORE_PRODUCTS', value }))
+      .finally(() => dispatch({ type: 'SET_FETCH_STATUS', value: REQUEST_STATUS.IDLE }))
   }
 
-  const handleClickPage = (curPage) => {
-    setState('LOADING')
-    setPage(curPage)
+  const handleSearch = (page) => {
+    if (!search || search.trim() === "") return
+
+    dispatch({ type: 'SET_FETCH_STATUS', value: REQUEST_STATUS.LOADING })
 
     document.querySelector('.grid').scrollTo({
       top: 0,
@@ -52,29 +45,18 @@ function App() {
       behavior: 'smooth'
     })
 
-    fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}&start=${curPage * perPage}`)
-      .then(res => res.json())
-      .then(({ data, total }) => {
-        setTotal(total)
-        setProducts(data)
-      }).finally(() => setState('DONE'))
-  }
-
-  const handleSubmit = (evt) => {
-    setState('LOADING')
-    setPage(0);
-    setProducts([])
-    setTotal(0)
-    evt.preventDefault();
-
-    if (search.trim() === "") return
-
-    fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}`)
-      .then(res => res.json())
-      .then(({ data, total }) => {
-        setTotal(total)
-        setProducts(data)
-      }).finally(() => setState('DONE'))
+    searchProduct(search, page)
+      .then(({ total, data }) => {
+        dispatch({
+          type: 'LOAD_PAGE',
+          value: {
+            total,
+            page,
+            products: data,
+          }
+        })
+      })
+      .finally(() => dispatch({ type: 'SET_FETCH_STATUS', value: REQUEST_STATUS.IDLE }))
   }
 
   const handleProductDetails = (product) => {
@@ -85,10 +67,10 @@ function App() {
       product
     });
 
-    fetch(`https://renner.icaro-mh.workers.dev/product?skuIds=${skuId}&productId=${productId}`)
+    fetch(`http://127.0.0.1:8787/product?skuId=${skuId}&productId=${productId}`)
       .then(res => res.json())
       .then(data => {
-        const details = data[Object.keys(data)[0]]
+        const details = data
         setSelectedProduct({
           product,
           details,
@@ -108,21 +90,10 @@ function App() {
           <h1 onClick={() => resetState()}>Renny</h1>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            placeholder='Produto a ser buscado'
-            type="search"
-            autoFocus
-            defaultValue={search}
-            onChange={(evt) => setSearch(evt.target.value)}
+        <SearchBox 
+          onChange={(value => dispatch({ type: 'SET_SEARCH', value }))}
+          onSubmit={handleSearch}
           />
-        </form>
-
-        <div className='results'>
-          {products.length > 0 && (
-            <span>Resultados para "{search}": {total}</span>
-          )}
-        </div>
       </div>
 
       <div className='grid'>
@@ -138,10 +109,10 @@ function App() {
       </div>
 
       {products.length && search && (
-        <Pagination onClickPage={handleClickPage} total={total} perPage={perPage} current={page}>
-          <button className='load-more-button' onClick={handleClickLoadMore} disabled={state === 'LOADING' || page >= Math.ceil(total / perPage)}>
+        <Pagination onClickPage={handleSearch} total={total} perPage={perPage} current={page}>
+          <button className='load-more-button' onClick={loadMoreProducts} disabled={fetchStatus === 'LOADING' || page >= Math.ceil(total / perPage)}>
             {
-              state === 'LOADING' ?
+              fetchStatus === 'LOADING' ?
                 <span>Carregando ... ⌛️</span>
                 : <span>Carregar mais produtos</span>
             }
