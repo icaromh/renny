@@ -54,8 +54,10 @@ export default function ProductDetails({ data, handleClose }) {
           <button className="product-details-close" onClick={handleClose}>✕</button>
         </div>
 
-
-        <div className="product-details-images">
+        {details?.purchasable === false ? (
+          <h1>PRODUTO ESGOTADO!!!</h1>
+        ) : (
+          <div className="product-details-images">
           <div className="product-details-images-list" ref={modalRef}>
             {details && details?.mediaSets.map(media => {
               return (
@@ -66,6 +68,9 @@ export default function ProductDetails({ data, handleClose }) {
             })}
           </div>
         </div>
+        )}
+
+        
 
       </div>
       <div className="modal-backdrop" onClick={handleClose}></div>
