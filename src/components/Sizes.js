@@ -45,7 +45,7 @@ export default function Sizes({ sizes, categoryName, data }) {
     useEffect(() => {
         if (inView) {
             const getInventory = async () => {
-                await fetch(`http://127.0.0.1:8787/inventory?productId=${productId}&skuList=${skuList}`)
+                await fetch(`https://renner.icaro-mh.workers.dev/inventory?productId=${productId}&skuList=${skuList}`)
                     .then(res => res.json())
                     .then((data) => setInventory(data))
                     .finally(() => setLoaded(true))
