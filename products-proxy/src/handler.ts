@@ -10,6 +10,7 @@ const corsHeaders = {
 
 import ProductRoute from './routes/product'
 import SearchRoute from './routes/search'
+import InventoryRoute from './routes/inventory'
 
 export async function handleRequest(request: Request): Promise<Response> {
   const { pathname } = new URL(request.url)
@@ -38,6 +39,28 @@ export async function handleRequest(request: Request): Promise<Response> {
 
   if (pathname.startsWith('/product')) {
     return ProductRoute(request)
+      .then(response => {
+        return new Response(JSON.stringify(response), {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            'content-type': 'application/json;charset=UTF-8',
+          },
+        })
+      })
+      .catch((reason) => {
+        return new Response(JSON.stringify(reason), {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'content-type': 'application/json;charset=UTF-8',
+          },
+        })
+      })
+  }
+
+  if (pathname.startsWith('/inventory')) {
+    return InventoryRoute(request)
       .then(response => {
         return new Response(JSON.stringify(response), {
           status: 200,

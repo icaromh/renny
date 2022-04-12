@@ -5,6 +5,9 @@ import Pagination from './components/Pagination'
 import ProductDetails from './components/ProductDetails'
 import Sizes from './components/Sizes'
 
+const API_URL = 'https://renner.icaro-mh.workers.dev' || 'http://127.0.0.1:8787'
+
+
 function sanitizeLetters(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
 }
@@ -33,7 +36,7 @@ function App() {
 
     if (search.trim() === "") return
 
-    fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}&start=${(page + 1) * perPage}`)
+    fetch(`${API_URL}/search?query=${sanitizeLetters(search)}&start=${(page + 1) * perPage}`)
       .then(res => res.json())
       .then(({ data, total }) => {
         setTotal(total)
@@ -52,7 +55,7 @@ function App() {
       behavior: 'smooth'
     })
 
-    fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}&start=${curPage * perPage}`)
+    fetch(`${API_URL}/search?query=${sanitizeLetters(search)}&start=${curPage * perPage}`)
       .then(res => res.json())
       .then(({ data, total }) => {
         setTotal(total)
@@ -69,7 +72,7 @@ function App() {
 
     if (search.trim() === "") return
 
-    fetch(`https://renner.icaro-mh.workers.dev/search?query=${sanitizeLetters(search)}`)
+    fetch(`${API_URL}/search?query=${sanitizeLetters(search)}`)
       .then(res => res.json())
       .then(({ data, total }) => {
         setTotal(total)
@@ -85,10 +88,10 @@ function App() {
       product
     });
 
-    fetch(`https://renner.icaro-mh.workers.dev/product?skuIds=${skuId}&productId=${productId}`)
+    fetch(`${API_URL}/product?skuId=${skuId}&productId=${productId}`)
       .then(res => res.json())
-      .then(data => {
-        const details = data[Object.keys(data)[0]]
+      .then(details => {
+        
         setSelectedProduct({
           product,
           details,
@@ -129,7 +132,7 @@ function App() {
         {products.filter(p => p.gender && p.gender[0] === 'Feminino').map(p => (
           <div className='product' key={p.linkId} onClick={() => handleProductDetails(p)}>
             <img target='_blank' src={p.imageId} />
-            {p?.size && <Sizes sizes={p.size} categoryName={p.categoryName} />}
+            {p?.size && <Sizes data={p} sizes={p.size} categoryName={p.categoryName} />}
             <span className='product-name'>{p.name}</span>
           </div>
         ))}

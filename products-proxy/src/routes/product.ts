@@ -1,10 +1,10 @@
 import { PRODUCT_URL } from "../constants";
 
-export default function ProductRoute(request: Request): Promise<any> {
+export default async function ProductRoute(request: Request): Promise<any> {
   const { searchParams } = new URL(request.url)
   const productId = searchParams.get('productId')
   const skuId = searchParams.get('skuId');
-  
+
   if (skuId) {
     return fetch(`${PRODUCT_URL}&skuId=${skuId}&productId=${productId}`)
       .then(response => response.json())
@@ -16,7 +16,7 @@ export default function ProductRoute(request: Request): Promise<any> {
           listPriceFormatted: response.listPriceFormatted,
           mediaSets: response.mediaSets
         }
-      })
+      }).catch(console.log)
   }
 
   return Promise.reject({})

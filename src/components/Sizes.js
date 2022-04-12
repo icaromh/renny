@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react"
+import { useInView } from 'react-intersection-observer';
 
 const MAP_SIZES_LETTERS = ['PP', 'P', 'M', 'G', 'GG']
 const MAP_SIZES_NUMBERS = ["34", "36", "38", "40", "42", "44", "46"]
@@ -25,13 +27,40 @@ function getScale(categoryName, sizes) {
 }
 
 
-export default function Sizes({ sizes, categoryName }) {
-    const scale = getScale(categoryName, sizes)
+export default function Sizes({ sizes, categoryName, data }) {
+    const [inventory, setInventory] = useState({})
+    const [isLoaded, setLoaded] = useState(false)
+    // const scale = getScale(categoryName, sizes)
+    const productId = `582642395`
+    const skuList = data.sku_list.join(',')
+    const { ref, inView, entry } = useInView({
+        /* Optional options */
+        threshold: 0,
+    });
+
+    const isAvailable = (size) => {
+        return inventory[size] || false
+    }
+
+    useEffect(() => {
+        if (inView) {
+            const getInventory = async () => {
+                await fetch(`http://127.0.0.1:8787/inventory?productId=${productId}&skuList=${skuList}`)
+                    .then(res => res.json())
+                    .then((data) => setInventory(data))
+                    .finally(() => setLoaded(true))
+            }
+            getInventory()
+        }
+
+    }, [inView, productId, skuList])
 
     return (
-        <div className='sizes'>
-            {scale.map(value => (
-                <span key={value} className={`size-value ${sizes.includes(value) ? '' : 'out-of-stock'}`}>{value}</span>
+        <div className='sizes' ref={ref}>
+            {!isLoaded ? (
+                <span className="size-value">🕑</span>
+            ) : data.sku_list.map((value, idx) => (
+                <span key={value} className={`size-value ${isAvailable(value) ? '' : 'out-of-stock'}`}>{data.size[idx]}</span>
             ))}
         </div>
     )
